@@ -8,7 +8,7 @@ import java.sql.Types;
 public class StoredFunctions {
 public static void main(String[] args) throws Exception {
 
-
+System.out.println("hjhjhj");
     Class.forName("com.mysql.cj.jdbc.Driver");
 
     Connection con = DriverManager.getConnection(
