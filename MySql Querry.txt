@@ -1,0 +1,761 @@
+# MySQL Commands & Examples
+
+## Basic Database Operations
+
+```sql
+-- Show all databases
+mysql> show databases;
+
+-- Create a new database
+mysql> create database advance_java;
+
+-- Use a specific database
+mysql> use advance_java;
+
+-- Show all tables in current database
+mysql> show tables;
+
+-- Create a table
+mysql> create table emp(id int, name varchar(50), salary int);
+
+-- Select all records from table
+mysql> select * from emp;
+
+-- Insert data into table
+mysql> insert into emp values(1, 'abc', 1000);
+mysql> insert into emp(id, name) values(2, 'xyz');
+
+-- Update data
+mysql> update emp set salary = 5500 where id = 1;
+
+-- Delete data
+mysql> delete from emp where id = 2;
+
+-- Select specific records
+mysql> select * from emp where id = 1;
+
+-- Select specific columns
+mysql> select id from emp;
+mysql> select id, name from emp;
+mysql> select name, id from emp;
+
+-- Drop table
+mysql> drop table emp;
+
+-- Drop database
+mysql> drop database advance_java;
+
+-- Add column to existing table
+mysql> alter table emp add salary int;
+```
+
+## Primary Key Examples
+
+### Primary Key with Table Creation
+```sql
+mysql> create table emp(id int primary key, name varchar(50), salary int);
+```
+
+### Primary Key After Table Creation
+```sql
+mysql> create table emp(id int, name varchar(50), salary int);
+mysql> alter table emp add primary key(id);
+```
+
+## Foreign Key Examples
+
+### Without ON UPDATE CASCADE & ON DELETE CASCADE
+```sql
+mysql> create table emp(id int primary key, name varchar(50), salary int);
+mysql> create table dept(id int primary key, dept_name varchar(50));
+mysql> alter table emp add dept_id int;
+mysql> alter table emp add foreign key(dept_id) references dept(id);
+```
+
+### With ON UPDATE CASCADE & ON DELETE CASCADE
+```sql
+mysql> create table emp(id int primary key, name varchar(50), salary int);
+mysql> create table dept(id int primary key, dept_name varchar(50));
+mysql> alter table emp add dept_id int;
+mysql> alter table emp add foreign key(dept_id) references dept(id) on update cascade on delete cascade;
+```
+
+### Foreign Key in Single SQL Query
+```sql
+mysql> create table dept(id int primary key, dept_name varchar(50));
+mysql> create table emp(id int primary key, name varchar(50), salary int, dept_id int, 
+       foreign key(dept_id) references dept(id) on update cascade on delete cascade);
+```
+
+## Aggregate Functions
+
+```sql
+mysql> select max(salary) from emp;
+mysql> select min(salary) from emp;
+mysql> select sum(salary) from emp;
+mysql> select count(salary) from emp;
+mysql> select count(*) from emp;
+```
+
+## Sorting and Filtering
+
+```sql
+-- Order by salary (ascending)
+mysql> select * from emp order by salary;
+
+-- Order by salary (descending)
+mysql> select * from emp order by salary desc;
+
+-- Order by name
+mysql> select * from emp order by name;
+mysql> select * from emp order by name desc;
+
+-- Filter by exact match
+mysql> select * from emp where name = 'abc';
+
+-- Filter with LIKE operator
+mysql> select * from emp where name like 'a%';
+```
+
+## LIMIT Clause
+
+```sql
+-- Get first 2 records
+mysql> select * from emp limit 0, 2;
+
+-- Get next 2 records (records 3-4)
+mysql> select * from emp limit 2, 2;
+```
+
+## Highest Salary Queries
+
+### With LIMIT
+```sql
+-- Highest salary
+mysql> select * from emp order by salary desc limit 0, 1;
+
+-- Second highest salary
+mysql> select * from emp order by salary desc limit 1, 1;
+
+-- Top 2 highest salaries
+mysql> select * from emp order by salary desc limit 0, 2;
+```
+
+### Without LIMIT (Using Subqueries)
+```sql
+-- Highest salary
+mysql> select max(salary) from emp; AND 
+
+5SELECT *
+FROM emp
+WHERE salary = (SELECT MAX(salary) FROM emp);
+
+-- Second highest salary
+mysql> select max(salary) from emp where salary < (select max(salary) from emp);
+
+-- Get employee with second highest salary
+mysql> select * from emp where salary = (select max(salary) from emp where salary < (select max(salary) from emp));
+
+-- Third highest salary
+mysql> select * from emp where salary = (select max(salary) from emp where salary < (select max(salary) from emp where salary < (select max(salary) from emp)));
+```
+
+## Lowest Salary Queries
+
+### With LIMIT
+```sql
+-- Lowest salary
+mysql> select * from emp order by salary limit 0, 1;
+
+-- Second lowest salary
+mysql> select * from emp order by salary limit 1, 1;
+
+-- Bottom 2 lowest salaries
+mysql> select * from emp order by salary limit 0, 2;
+```
+
+### Without LIMIT (Using Subqueries)
+```sql
+-- Lowest salary
+mysql> select min(salary) from emp;
+
+-- Second lowest salary
+mysql> select min(salary) from emp where salary > (select min(salary) from emp);
+
+-- Get employee with second lowest salary
+mysql> select * from emp where salary = (select min(salary) from emp where salary > (select min(salary) from emp));
+
+-- Third lowest salary
+mysql> select * from emp where salary = (select min(salary) from emp where salary > (select min(salary) from emp where salary > (select min(salary) from emp)));
+```
+
+## Aliases
+
+```sql
+-- Column aliases with AS keyword
+mysql> select emp.id as emp_id, name, salary from emp;
+mysql> select emp.id as emp_id, name as emp_name, salary as emp_salary from emp;
+
+-- Table alias
+mysql> select e.id as emp_id, name as emp_name, salary as emp_salary from emp as e;
+
+-- Aliases without AS keyword
+mysql> select e.id emp_id, name emp_name, salary emp_salary from emp e;
+
+-- Multiple table aliases
+mysql> select e.id as emp_id, name as emp_name, salary as emp_salary, 
+       d.id as dept_id, dept_name as dept_namee 
+       from emp as e, dept as d 
+       where e.dept_id = d.id;
+```     
+
+## JOIN Examples
+
+### Sample Data
+```sql
+-- Employee table
+mysql> select * from emp;
++----+-----------+--------+
+| id | name      | salary |
++----+-----------+--------+
+|  1 | abc       |   1000 |
+|  2 | xyz       |    100 |
+|  3 | pqr       |    700 |
+|  4 | vinjan    |   1700 |
+|  5 | suraj     |   1100 |
+|  6 | priya     |   2100 |
+|  7 | madhumita |   1200 |
++----+-----------+--------+
+
+-- Department table
+mysql> select * from dept;
++-----+-----------+
+| id  | dept_name |
++-----+-----------+
+|   1 | sales     |
+|   2 | marketing |
+|   3 | it        |
+| 100 | accounts  |
++-----+-----------+
+```
+
+### 1. INNER JOIN
+```sql
+mysql> select * from emp inner join dept on emp.id = dept.id;
++----+------+--------+----+-----------+
+| id | name | salary | id | dept_name |
++----+------+--------+----+-----------+
+|  1 | abc  |   1000 |  1 | sales     |
+|  2 | xyz  |    100 |  2 | marketing |
+|  3 | pqr  |    700 |  3 | it        |
++----+------+--------+----+-----------+
+```
+
+### 2. LEFT JOIN
+```sql
+mysql> select * from emp left join dept on emp.id = dept.id;
++----+-----------+--------+------+-----------+
+| id | name      | salary | id   | dept_name |
++----+-----------+--------+------+-----------+
+|  1 | abc       |   1000 |    1 | sales     |
+|  2 | xyz       |    100 |    2 | marketing |
+|  3 | pqr       |    700 |    3 | it        |
+|  4 | vinjan    |   1700 | NULL | NULL      |
+|  5 | suraj     |   1100 | NULL | NULL      |
+|  6 | priya     |   2100 | NULL | NULL      |
+|  7 | madhumita |   1200 | NULL | NULL      |
++----+-----------+--------+------+-----------+
+```
+
+### 3. RIGHT JOIN
+```sql
+mysql> select * from emp right join dept on emp.id = dept.id;
++------+------+--------+-----+-----------+
+| id   | name | salary | id  | dept_name |
++------+------+--------+-----+-----------+
+|    1 | abc  |   1000 |   1 | sales     |
+|    2 | xyz  |    100 |   2 | marketing |
+|    3 | pqr  |    700 |   3 | it        |
+| NULL | NULL |   NULL | 100 | accounts  |
++------+------+--------+-----+-----------+
+```
+
+### 4. FULL OUTER JOIN (Using UNION)
+```sql
+mysql> select * from emp left join dept on emp.id = dept.id 
+       union 
+       select * from emp right join dept on emp.id = dept.id;
++------+-----------+--------+------+-----------+
+| id   | name      | salary | id   | dept_name |
++------+-----------+--------+------+-----------+
+|    1 | abc       |   1000 |    1 | sales     |
+|    2 | xyz       |    100 |    2 | marketing |
+|    3 | pqr       |    700 |    3 | it        |
+|    4 | vinjan    |   1700 | NULL | NULL      |
+|    5 | suraj     |   1100 | NULL | NULL      |
+|    6 | priya     |   2100 | NULL | NULL      |
+|    7 | madhumita |   1200 | NULL | NULL      |
+| NULL | NULL      |   NULL |  100 | accounts  |
++------+-----------+--------+------+-----------+
+```
+
+### 5. FULL OUTER JOIN (Excluding Matches)
+```sql
+mysql> select * from emp left join dept on emp.id = dept.id where dept.id is null 
+       union 
+       select * from emp right join dept on emp.id = dept.id where emp.id is null;
++------+-----------+--------+------+-----------+
+| id   | name      | salary | id   | dept_name |
++------+-----------+--------+------+-----------+
+|    4 | vinjan    |   1700 | NULL | NULL      |
+|    5 | suraj     |   1100 | NULL | NULL      |
+|    6 | priya     |   2100 | NULL | NULL      |
+|    7 | madhumita |   1200 | NULL | NULL      |
+| NULL | NULL      |   NULL |  100 | accounts  |
++------+-----------+--------+------+-----------+
+```
+
+## Marksheet Example
+
+```sql
+-- Create marksheet table
+mysql> create table marksheet(id int primary key, roll_no int, name varchar(30), 
+       physics int, chemistry int, maths int);
+
+-- Insert sample data
+mysql> insert into marksheet values
+       (1, 101, 'vinjal', 76, 78, 98),
+       (2, 102, 'suraj', 78, 88, 99),
+       (3, 103, 'priya', 67, 66, 89),
+       (4, 104, 'madhumita', 78, 67, 89),
+       (5, 105, 'abc', 11, 22, 33),
+       (6, 106, 'xyz', 23, 43, 52);
+
+-- Calculate total marks 
+mysql> select *, (physics + chemistry + maths) as total from marksheet;
++----+---------+-----------+---------+-----------+-------+-------+
+| id | roll_no | name      | physics | chemistry | maths | total |
++----+---------+-----------+---------+-----------+-------+-------+
+|  1 |     101 | vinjal    |      76 |        78 |    98 |   252 |
+|  2 |     102 | suraj     |      78 |        88 |    99 |   265 |
+|  3 |     103 | priya     |      67 |        66 |    89 |   222 |
+|  4 |     104 | madhumita |      78 |        67 |    89 |   234 |
+|  5 |     105 | abc       |      11 |        22 |    33 |    66 |
+|  6 |     106 | xyz       |      23 |        43 |    52 |   118 |
++----+---------+-----------+---------+-----------+-------+-------+
+
+-- Order by total marks (ascending)
+mysql> select *, (physics + chemistry + maths) as total from marksheet order by total;
++----+---------+-----------+---------+-----------+-------+-------+
+| id | roll_no | name      | physics | chemistry | maths | total |
++----+---------+-----------+---------+-----------+-------+-------+
+|  5 |     105 | abc       |      11 |        22 |    33 |    66 |
+|  6 |     106 | xyz       |      23 |        43 |    52 |   118 |
+|  3 |     103 | priya     |      67 |        66 |    89 |   222 |
+|  4 |     104 | madhumita |      78 |        67 |    89 |   234 |
+|  1 |     101 | vinjal    |      76 |        78 |    98 |   252 |
+|  2 |     102 | suraj     |      78 |        88 |    99 |   265 |
++----+---------+-----------+---------+-----------+-------+-------+
+
+-- Order by total marks (descending)
+mysql> select *, (physics + chemistry + maths) as total from marksheet order by total desc;
++----+---------+-----------+---------+-----------+-------+-------+
+| id | roll_no | name      | physics | chemistry | maths | total |
++----+---------+-----------+---------+-----------+-------+-------+
+|  2 |     102 | suraj     |      78 |        88 |    99 |   265 |
+|  1 |     101 | vinjal    |      76 |        78 |    98 |   252 |
+|  4 |     104 | madhumita |      78 |        67 |    89 |   234 |
+|  3 |     103 | priya     |      67 |        66 |    89 |   222 |
+|  6 |     106 | xyz       |      23 |        43 |    52 |   118 |
+|  5 |     105 | abc       |      11 |        22 |    33 |    66 |
++----+---------+-----------+---------+-----------+-------+-------+
+
+-- Top 3 students by total marks
+mysql> select *, (physics + chemistry + maths) as total from marksheet order by total desc limit 0, 3;
++----+---------+-----------+---------+-----------+-------+-------+
+| id | roll_no | name      | physics | chemistry | maths | total |
++----+---------+-----------+---------+-----------+-------+-------+
+|  2 |     102 | suraj     |      78 |        88 |    99 |   265 |
+|  1 |     101 | vinjal    |      76 |        78 |    98 |   252 |
+|  4 |     104 | madhumita |      78 |        67 |    89 |   234 |
++----+---------+-----------+---------+-----------+-------+-------+
+
+-- Top 3 students who passed all subjects (>=33 in each)
+mysql> select *, (physics + chemistry + maths) as total from marksheet 
+       where physics >= 33 and chemistry >= 33 and maths >=33 
+       order by total desc limit 0, 3;
++----+---------+-----------+---------+-----------+-------+-------+
+| id | roll_no | name      | physics | chemistry | maths | total |
++----+---------+-----------+---------+-----------+-------+-------+
+|  2 |     102 | suraj     |      78 |        88 |    99 |   265 |
+|  1 |     101 | vinjal    |      76 |        78 |    98 |   252 |
+|  4 |     104 | madhumita |      78 |        67 |    89 |   234 |
++----+---------+-----------+---------+-----------+-------+-------+
+```
+
+## GROUP BY Example
+
+```sql
+-- Count employees by salary
+mysql> select salary, count(*) from emp group by salary;
+```
+
+## Trigger Example
+
+```sql
+-- Create a trigger that copies deleted records to another table
+DELIMITER //
+CREATE TRIGGER after_emp_delete
+AFTER DELETE ON emp
+FOR EACH ROW
+BEGIN
+    INSERT INTO emp2 (id, name)
+    VALUES (OLD.id, OLD.name);
+END//
+DELIMITER ;
+```
+
+## Stored Procedures
+
+### 1. IN Parameter
+```sql
+DELIMITER //
+CREATE PROCEDURE empIn (IN c INT)
+BEGIN
+    SELECT * FROM emp WHERE id = c;
+END//
+DELIMITER ;
+
+-- Usage
+SET @input = 11;
+CALL empIn(@input);
+```
+
+### 2. OUT Parameter
+```sql
+DELIMITER //
+CREATE PROCEDURE empOut (OUT c INT)
+BEGIN
+    SELECT salary INTO c FROM emp WHERE id = 10;
+END//
+DELIMITER ;
+
+-- Usage
+CALL empOut(@output);
+SELECT @output;
+```
+
+### 3. INOUT Parameter
+```sql
+DELIMITER //
+CREATE PROCEDURE empInOut (INOUT c INT)
+BEGIN
+    SELECT salary INTO c FROM emp WHERE id = c;
+END//
+DELIMITER ;
+
+-- Usage
+SET @inout = 1;
+CALL empInOut(@inout);
+SELECT @inout;
+```
+
+## Stored Function
+
+```sql
+DELIMITER //
+CREATE FUNCTION square(num INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE result INT;
+    SET result = num * num;
+    RETURN result;
+END//
+DELIMITER ;
+
+-- Usage
+SELECT square(10);
+```
+
+## Java JDBC Examples
+
+### TestProcedureInOut.java
+```java
+import java.sql.*;
+
+public class TestProcedureInOut {
+    public static void main(String[] args) throws Exception {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        
+        Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/java_Advance",
+                "root",
+                "root"
+        );
+        
+        CallableStatement callStmt = conn.prepareCall("{CALL empInOut(?)}");
+        callStmt.setInt(1, 10);
+        callStmt.registerOutParameter(1, Types.INTEGER);
+        callStmt.execute();
+        
+        System.out.println(callStmt.getInt(1));
+        conn.close();
+    }
+}
+```
+
+### TestStoreFunction.java
+```java
+import java.sql.*;
+
+public class TestStoreFunction {
+    public static void main(String[] args) throws Exception {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        
+        Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/java_Advance",
+                "root",
+                "root"
+        );
+        
+        CallableStatement callStmt = conn.prepareCall("{? = CALL square(?)}");
+        callStmt.registerOutParameter(1, Types.INTEGER);
+        callStmt.setInt(2, 10);
+        callStmt.execute();
+        
+        System.out.println("Square = " + callStmt.getInt(1));
+        conn.close();
+    }
+}
+```
+
+## JOIN Types Summary
+
+### 1. INNER JOIN
+Returns only matching records from both tables.
+
+**Query:**
+```sql
+SELECT * FROM emp INNER JOIN department ON emp.id = department.dept_id;
+```
+
+**Output:** Only rows where `emp.id` matches `department.dept_id`.
+
+### 2. LEFT JOIN
+Returns all records from left table (emp) and matching records from right table (department).
+
+**Query:**
+```sql
+SELECT * FROM emp LEFT JOIN department ON emp.id = department.dept_id;
+```
+
+**Output:** All emp records + matching department records (NULL if no match).
+
+### 3. RIGHT JOIN
+Returns all records from right table (department) and matching records from left table (emp).
+
+**Query:**
+```sql
+SELECT * FROM emp RIGHT JOIN department ON emp.id = department.dept_id;
+```
+
+**Output:** All department records + matching emp records (NULL if no match).
+
+### 4. FULL OUTER JOIN (Using UNION)
+Returns all records from both tables.
+
+**Query:**
+```sql
+SELECT * FROM emp LEFT JOIN department ON emp.id = department.dept_id
+UNION
+SELECT * FROM emp RIGHT JOIN department ON emp.id = department.dept_id;
+```
+
+**Output:** All records from both tables with NULL for non-matching columns.
+
+### 5. FULL OUTER JOIN (Excluding Matches)
+Returns only non-matching records from both tables.
+
+**Query:**
+```sql
+SELECT * FROM emp LEFT JOIN department ON emp.id = department.dept_id
+WHERE department.dept_id IS NULL
+UNION
+SELECT * FROM emp RIGHT JOIN department ON emp.id = department.dept_id
+WHERE emp.id IS NULL;
+```
+
+**Output:** Only records that exist in one table but not the other.
+
+## Corrections to Original Queries
+
+1. **In the FULL OUTER JOIN example**, the original query had a typo:
+   - Wrong: `select * from emp left join dept on emp.id = dept.id where dept.id is null union select * from emp right join dept on emp.id = dept.id where emp.id is null;`
+   - Corrected: The query is actually correct as written.
+
+2. **In the marksheet example**, ensure all column names are consistent:
+   - The column `dept_name` should be consistent in all queries (not `dept_namee` in some places).
+
+3. **In stored procedures**, ensure proper DELIMITER usage:
+   - Always reset DELIMITER back to semicolon after creating procedures/functions.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1. Log table
+CREATE TABLE dept_log (
+    dept_id INT,
+    dept_name VARCHAR(30),
+    action VARCHAR(30)
+);
+2. BEFORE INSERT
+
+Insert hone se pehle department name uppercase karenge.
+
+DELIMITER //
+
+CREATE TRIGGER before_dept_insert
+BEFORE INSERT ON dept
+FOR EACH ROW
+BEGIN
+    SET NEW.dept_name = UPPER(NEW.dept_name);
+END //
+
+DELIMITER ;
+
+Test:
+
+INSERT INTO dept VALUES (4, 'hr');
+
+Result:
+
+4    HR
+3. AFTER INSERT
+
+Insert hone ke baad log table me entry.
+
+DELIMITER //
+
+CREATE TRIGGER after_dept_insert
+AFTER INSERT ON dept
+FOR EACH ROW
+BEGIN
+    INSERT INTO dept_log
+    VALUES (NEW.id, NEW.dept_name, 'AFTER INSERT');
+END //
+
+DELIMITER ;
+
+Test:
+
+INSERT INTO dept VALUES (5, 'finance');
+
+dept_log:
+
+5    FINANCE    AFTER INSERT
+UPDATE
+4. BEFORE UPDATE
+
+Update hone se pehle name uppercase karenge.
+
+DELIMITER //
+
+CREATE TRIGGER before_dept_update
+BEFORE UPDATE ON dept
+FOR EACH ROW
+BEGIN
+    SET NEW.dept_name = UPPER(NEW.dept_name);
+END //
+
+DELIMITER ;
+
+Test:
+
+UPDATE dept
+SET dept_name = 'sales'
+WHERE id = 4;
+
+Result:
+
+4    SALES
+5. AFTER UPDATE
+
+Update complete hone ke baad log table me entry.
+
+DELIMITER //
+
+CREATE TRIGGER after_dept_update
+AFTER UPDATE ON dept
+FOR EACH ROW
+BEGIN
+    INSERT INTO dept_log
+    VALUES (NEW.id, NEW.dept_name, 'AFTER UPDATE');
+END //
+
+DELIMITER ;
+
+Test:
+
+UPDATE dept
+SET dept_name = 'accounts'
+WHERE id = 4;
+
+Log:
+
+4    ACCOUNTS    AFTER UPDATE
+DELETE
+6. BEFORE DELETE
+
+Delete hone se pehle log me old record save karenge.
+
+DELIMITER //
+
+CREATE TRIGGER before_dept_delete
+BEFORE DELETE ON dept
+FOR EACH ROW
+BEGIN
+    INSERT INTO dept_log
+    VALUES (OLD.id, OLD.dept_name, 'BEFORE DELETE');
+END //
+
+DELIMITER ;
+
+Test:
+
+DELETE FROM dept
+WHERE id = 4;
+7. AFTER DELETE
+
+Delete complete hone ke baad log karenge.
+
+DELIMITER //
+
+CREATE TRIGGER after_dept_delete
+AFTER DELETE ON dept
+FOR EACH ROW
+BEGIN
+    INSERT INTO dept_log
+    VALUES (OLD.id, OLD.dept_name, 'AFTER DELETE');
+END //
+
+DELIMITER ;
+Important
+
+Delete me NEW nahi hota, isliye:
+
+OLD.id
+OLD.dept_name
+
+use karenge.
+
+Exam ke liye sabse important table
+Event	BEFORE	AFTER
+INSERT	NEW	NEW
+UPDATE	OLD + NEW	OLD + NEW
+DELETE	OLD	OLD
+
+
+
+
+
+
