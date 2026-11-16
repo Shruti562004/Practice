@@ -1,3 +1,4 @@
+Shruti Rathore 
 # MySQL Commands & Examples
 
 ## Basic Database Operations
